@@ -4,14 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server",
+    "build": "cd react_ui && npm install && npm run build"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nanyangcn/FullStackOpen2020ExercisesPart3.git"
   },
+  "cacheDirectories": [
+    "node_modules",
+    "react-ui/node_modules"
+  ],
   "author": "Yang Nan",
   "license": "ISC",
   "bugs": {
