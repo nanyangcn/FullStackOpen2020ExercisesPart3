@@ -2,10 +2,12 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const dotenv = require("dotenv")
+
 dotenv.config()
 
 const app = express()
 
+app.use(express.static('build'))
 app.use(cors())
 app.use(express.json())
 
