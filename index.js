@@ -7,7 +7,7 @@ dotenv.config()
 
 const app = express()
 
-app.use(express.static('./react_ui/build'))
+app.use(express.static('react_ui/build'))
 app.use(cors())
 app.use(express.json())
 
