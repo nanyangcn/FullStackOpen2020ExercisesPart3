@@ -2,12 +2,13 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const dotenv = require("dotenv")
+const path = require('path');
 
 dotenv.config()
 
 const app = express()
 
-app.use(express.static('build'))
+app.use(express.static(path.resolve(__dirname, '../react_ui/build')))
 app.use(cors())
 app.use(express.json())
 
