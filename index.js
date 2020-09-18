@@ -83,7 +83,7 @@ app.delete('/api/persons/:id', (req, res) => {
   const personsFilter = persons.filter(person => person.id !== id)
 
   if (persons.length === personsFilter.length) {
-    res.status(204).end()
+    res.status(404).end()
   }
   else {
     persons = personsFilter
