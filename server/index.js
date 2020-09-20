@@ -1,14 +1,10 @@
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
-const dotenv = require("dotenv")
-const path = require('path');
-const mongoose = require('mongoose')
+const dotenv = require('dotenv')
+const path = require('path')
 
-const Person = require('./models/person');
-const e = require('express');
-const { nextTick } = require('process');
-const { response } = require('express');
+const Person = require('./models/person')
 
 dotenv.config()
 
@@ -18,7 +14,7 @@ app.use(express.static(path.resolve(__dirname, '../react_ui/build')))
 app.use(cors())
 app.use(express.json())
 
-morgan.token('postRes', (req, res) => JSON.stringify(req.body))
+morgan.token('postRes', (req) => JSON.stringify(req.body))
 app.use(morgan((tokens, req, res) => {
   if (tokens.method(req, res) === 'POST') {
     return [
@@ -29,8 +25,7 @@ app.use(morgan((tokens, req, res) => {
       tokens['response-time'](req, res), 'ms',
       tokens.postRes(req, res)
     ].join(' ')
-  }
-  else {
+  } else {
     return [
       tokens.method(req, res),
       tokens.url(req, res),
@@ -41,31 +36,30 @@ app.use(morgan((tokens, req, res) => {
   }
 }))
 
-let persons = [
-  {
-    "name": "Arto Hellas",
-    "number": "040-123456",
-    "id": 1
-  },
-  {
-    "name": "Ada Lovelace",
-    "number": "39-44-5323523",
-    "id": 2
-  },
-  {
-    "name": "Dan Abramov",
-    "number": "12-43-234345",
-    "id": 3
-  },
-  {
-    "name": "Mary Poppendieck",
-    "number": "39-23-6423122",
-    "id": 4
-  }
-]
+// let persons = [
+//   {
+//     "name": "Arto Hellas",
+//     "number": "040-123456",
+//     "id": 1
+//   },
+//   {
+//     "name": "Ada Lovelace",
+//     "number": "39-44-5323523",
+//     "id": 2
+//   },
+//   {
+//     "name": "Dan Abramov",
+//     "number": "12-43-234345",
+//     "id": 3
+//   },
+//   {
+//     "name": "Mary Poppendieck",
+//     "number": "39-23-6423122",
+//     "id": 4
+//   }
+// ]
 
 app.get('/info', (req, res, next) => {
-  let personsLength = 0
   Person
     .find({})
     .then(response => {
@@ -77,7 +71,6 @@ app.get('/info', (req, res, next) => {
     .catch(error => {
       next(error)
     })
-
 })
 
 app.get('/api/persons', (req, res, next) => {
@@ -107,9 +100,8 @@ app.get('/api/persons/:id', (req, res, next) => {
       console.log(person)
       if (person) {
         res.json(person)
-      }
-      else {
-        res.status(404).end()
+      } else {
+        res.status(404).send('This Id does not exist')
       }
     })
     .catch(error => next(error))
@@ -141,18 +133,12 @@ app.post('/api/persons', (req, res, next) => {
   const newPerson = req.body
 
   // const newPersonId = () => {
-  //   // if (persons.length === 0)  
+  //   // if (persons.length === 0)
   //   //   return(1)
   //   // else
   //   //   return(Math.max(...persons.map(person => person.id)) + 1)
   //   return(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
   // }
-
-  if (!newPerson) {
-    return res.status(400).json({
-      error: 'content missing'
-    })
-  }
 
   if (newPerson.name === '' || !newPerson.name || newPerson.number === '' || !newPerson.number) {
     return res.status(400).json({
@@ -186,7 +172,7 @@ app.post('/api/persons', (req, res, next) => {
 
 app.put('/api/persons/:id', (req, res, next) => {
   // const updataId = Number(req.params.id)
-  
+
   // const updataIndex = persons.findIndex(person => person.id == updataId)
 
   // if (updataIndex === -1) {
@@ -203,11 +189,12 @@ app.put('/api/persons/:id', (req, res, next) => {
   }
 
   Person
-    .findByIdAndUpdate(req.params.id, person, { new: true })
+    .findByIdAndUpdate(req.params.id, person, { new: true, runValidators: true, context: 'query' })
     .then(person => {
       res.json(person)
     })
     .catch((error) => {
+      console.log(error)
       next(error)
     })
 })
@@ -215,8 +202,10 @@ app.put('/api/persons/:id', (req, res, next) => {
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
-  if (error.name ==='CastError' && error.kind === 'ObjectId') {
-    return response.status(400).send({error: 'malformatted id' })
+  if (error.name === 'CastError' && error.kind === 'ObjectId') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
   }
 
   next(error)
